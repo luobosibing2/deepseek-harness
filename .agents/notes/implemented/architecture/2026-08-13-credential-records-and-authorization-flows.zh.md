@@ -55,7 +55,7 @@ seam 的边缘与写入路径同一纪律。prompt 被拒是结果而非故障�
 
 `openai-codex` 回到提供方选择器与 Models 页目录。全部 38 个已安装提供方都提供登录入口：31 个经 pi-ai 自己的提示收取密钥，6 个在此之外还提供订阅登录，Codex 只提供订阅登录。
 
-尚未包含的是界面：把 notice 与 prompt 送到浏览器的 wire 契约，以及 Models 页上发起登录的控件。在那之前，flow 只能在进程内触达，部署方仍然通过在设置表单里输入密钥来配置。
+[ChatGPT 终端辅助工具](../../../../docs/user/guide/providers.zh.md#sign-in-with-chatgpt)调用现有授权服务，并在其当前 CLI（命令行界面）profile 中启用 Codex 路由。用于向浏览器传递授权 notice 和 prompt 的 wire 契约，以及 Models 页上发起 OAuth 登录的控件，仍未提供。Models 页可以配置使用已存储 grant 的路由；API 密钥仍通过设置表单配置。
 
 有两项限制记在包 README 里而非就地修复。一次尝试不可持久，登录途中刷新页面会丢弃它。登出即 `deleteRecord`，它只在本地遗忘而不通知签发方；需要服务端吊销的提供方无处声明这一点。
 

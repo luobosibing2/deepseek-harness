@@ -1,0 +1,11 @@
+# Explicit one-shot OAuth over the shipped headless profile. The normal task
+# startup and runner must not create an Agent or consume this process's input.
+- id: headless-startup
+  disabled: true
+
+- id: headless-runner
+  disabled: true
+
+- insert:
+    - id: chatgpt-login
+      name: './chatgpt-login.mjs'

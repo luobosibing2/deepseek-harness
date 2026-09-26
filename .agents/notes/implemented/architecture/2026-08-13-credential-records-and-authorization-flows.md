@@ -55,7 +55,7 @@ Withdrawal settles an attempt whether or not its flow reacts to the signal. A fl
 
 `openai-codex` returns to the provider picker and to the Models page directory. All 38 installed providers offer sign-in: 31 collect a key through pi-ai's own prompt, six offer that beside a subscription login, and Codex offers only the subscription login.
 
-What this does not yet include is the surface: the wire contract that carries notices and prompts to the browser, and the Models-page control that starts a login. Until that lands, the flows are reachable only in-process, and a deployment still configures a key by typing it into the settings form.
+The [ChatGPT terminal helper](../../../../docs/user/guide/providers.md#sign-in-with-chatgpt) consumes the existing authorization service and enables the Codex route in its active CLI profile. The browser wire contract that carries authorization notices and prompts, and the Models-page control that starts OAuth login, remain absent. The Models page can configure a route that uses an already stored grant; API keys remain configurable through the settings form.
 
 Two limits are recorded in the package READMEs rather than fixed. An attempt is not durable, so reloading the page mid-login abandons it. And signing out is `deleteRecord`, which forgets the record locally without telling the issuer; a provider needing a server-side revoke has nowhere to declare it.
 

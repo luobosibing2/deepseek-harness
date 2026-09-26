@@ -16,7 +16,24 @@ Keys are write-only. The page receives a redacted descriptor after saving, never
 
 Choose **Add model provider**. The card opens on **Third-party model provider**: pick a provider dsh ships with — the list shows provider ids such as `anthropic`, `openai`, `moonshotai` for Kimi, or `zai` for GLM — enter its API key, and save. The installed catalog supplies the endpoint, protocol, and model list.
 
-Providers that sign in with OAuth, such as Codex, are not supported here yet.
+The Models page does not start OAuth sign-in. For a ChatGPT subscription, use the terminal helper below, then select `openai-codex` here without entering an API key.
+
+<a id="sign-in-with-chatgpt"></a>
+### Sign in with ChatGPT
+
+From a built source checkout, run the optional login overlay in a terminal. Use the same `DSH_HOME` as the Web or Desktop application that will use the account:
+
+```sh
+pnpm dsh --profile headless --patch apps/cli/config/examples/chatgpt-login/cordis.patch.yml
+```
+
+The helper prints its profile and Harness home. Press Enter for browser login, open the printed authorization link, and complete sign-in with your ChatGPT account. The browser callback completes the attempt; if necessary, paste the callback URL into the terminal prompt. You can select device-code login instead and follow the printed verification instructions. Ctrl-C or closing terminal input cancels the attempt. The helper does not create a conversation or send a model request.
+
+After authorization, the helper saves the credential through the existing store, adds a missing `openai-codex` route to the active `headless` profile, and exits. Existing provider settings and the default model stay unchanged. If that route names `apiKeyEnv`, the helper stops before login: remove the override in that profile's settings if you intend to use subscription authentication. If saving settings fails after authorization, the credential remains saved and the helper reports that profile activation is incomplete.
+
+Credentials are shared by profiles using the same Harness home, but model settings are profile-local. In Web or Desktop, open **Settings → Models → Add model provider**, select `openai-codex`, leave the API key blank, and save. Keep its built-in endpoint and protocol. Then select one of its models in a new conversation and send a short message to check account access. A successful OAuth login alone does not establish model availability or a successful inference request; this final check uses your account.
+
+The `openai` provider continues to use an OpenAI API key. The subscription helper uses the separate `openai-codex` provider; it does not import another application's credentials or change Desktop's reserved profile through the CLI.
 
 ## Add a custom model API
 

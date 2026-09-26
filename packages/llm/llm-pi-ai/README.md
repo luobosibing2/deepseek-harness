@@ -92,6 +92,8 @@ The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-a
 
 ### Sign in to a provider
 
+The optional [ChatGPT terminal helper](../../../docs/user/guide/providers.md#sign-in-with-chatgpt) starts the installed Codex OAuth flow and enables its route in the active CLI profile. Web and Desktop share credentials when they use the same Harness home, but each keeps its own model settings.
+
 A provider pi-ai ships a login for can be signed into through the harness authorization seam: the flow offers OAuth or an interactive key prompt (a key is typed into pi-ai's own login prompt, not into the settings form), and the resulting credential is stored in the harness credential store at `llm-pi-ai/<provider id>`. The stored sign-in authenticates its route beneath any `apiKeyEnv` override and refreshes itself under the store's cross-process lock; signing out deletes the stored record. A hand-declared route key outside the record grammar — a lowercase hyphenated identifier — cannot be signed into, because a record write for it refuses with `LlmError('UNSTORABLE_PROVIDER_ID')`; such a route authenticates through `apiKeyEnv` or ambient provider settings instead.
 
 ### Resolve the model catalog

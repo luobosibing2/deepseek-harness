@@ -16,7 +16,24 @@
 
 选择**添加模型提供商**。卡片默认打开在**第三方模型提供商**：选取 dsh 自带的提供商——列表显示的是提供商 id，例如 `anthropic`、`openai`、Kimi 对应的 `moonshotai`、GLM 对应的 `zai`——输入其 API 密钥并保存。已安装目录会提供端点、协议和模型列表。
 
-通过 OAuth 登录的提供商（例如 Codex）暂不支持。
+模型页不会发起 OAuth 登录。使用 ChatGPT 订阅时，先运行下面的终端辅助工具，再在此选择 `openai-codex`，无需输入 API 密钥。
+
+<a id="sign-in-with-chatgpt"></a>
+### 使用 ChatGPT 登录
+
+在已构建的源码仓库中，通过终端运行可选的登录 overlay。使用与目标 Web 或桌面应用相同的 `DSH_HOME`：
+
+```sh
+pnpm dsh --profile headless --patch apps/cli/config/examples/chatgpt-login/cordis.patch.yml
+```
+
+辅助工具会输出 profile 和 Harness home。按 Enter 使用浏览器登录，打开终端显示的授权链接，使用 ChatGPT 账号完成登录。浏览器回调会完成本次授权；必要时可将回调 URL 粘贴到终端提示中。也可以选择设备码登录，按显示的验证说明操作。Ctrl-C 或关闭终端输入会取消本次授权。辅助工具不会创建会话或发送模型请求。
+
+授权完成后，辅助工具通过已有存储保存凭据，为当前 `headless` profile 补上缺失的 `openai-codex` 路由，然后退出。已有提供商设置和默认模型保持不变。如果该路由指定了 `apiKeyEnv`，辅助工具会在登录前停止：若要使用订阅认证，需先在该 profile 的设置中移除此覆盖。授权后保存设置失败时，凭据仍保留，辅助工具会说明此 profile 尚未完成启用。
+
+使用同一 Harness home 的 profile 共享凭据，但模型设置分别保存。在 Web 或桌面端打开**设置 → 模型 → 添加模型提供商**，选择 `openai-codex`，将 API 密钥留空并保存，保留内置端点和协议。随后在新会话中选择它提供的一个模型，发送一条简短消息验证账号访问。OAuth 登录成功本身不能证明模型可用或推理请求成功；最后一步需要使用你的账号验证。
+
+`openai` 提供商继续使用 OpenAI API 密钥。订阅登录辅助工具使用独立的 `openai-codex` 提供商，不导入其他应用的凭据，也不通过 CLI（命令行界面）修改桌面端专用 profile。
 
 ## 添加自定义模型 API
 

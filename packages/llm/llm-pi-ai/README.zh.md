@@ -92,6 +92,8 @@ kind: "package-reference"
 
 ### 登录提供方
 
+可选的 [ChatGPT 终端辅助工具](../../../docs/user/guide/providers.zh.md#sign-in-with-chatgpt)会发起已安装的 Codex OAuth 流程，并在当前 CLI（命令行界面）profile 中启用其路由。Web 和桌面端使用同一 Harness home 时共享凭据，但分别保存自己的模型设置。
+
 pi-ai 提供登录的提供方可以通过 harness 授权 seam 登录：流程提供 OAuth 或交互式密钥提示（密钥键入 pi-ai 自己的登录提示，而非设置表单），得到的凭据存储在 harness 凭据存储的 `llm-pi-ai/<provider id>` 记录中。存储的登录在其路由的 `apiKeyEnv` 覆盖之下完成认证，并在存储的跨进程锁下自行刷新；退出登录即删除存储记录。落在记录文法之外——小写连字符标识符——的手工声明路由键无法登录，因为对它的记录写入会以 `LlmError('UNSTORABLE_PROVIDER_ID')` 拒绝；这类路由改用 `apiKeyEnv` 或提供方 ambient 设置认证。
 
 ### 解析模型目录

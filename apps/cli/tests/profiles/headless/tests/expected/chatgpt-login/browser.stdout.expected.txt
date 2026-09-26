@@ -1,0 +1,12 @@
+Profile: headless
+Harness home: <DSH_HOME>
+Select OpenAI Codex login method:
+  1. Browser login (default)
+  2. Device code login
+Press Enter for the first option.
+Complete browser sign-in.
+Open: https://example.test/start
+Paste the callback URL:
+Input is hidden. Press Enter to submit; Ctrl-C or Ctrl-D cancels.
+ChatGPT login complete; credential saved.
+Profile headless: openai-codex enabled.
