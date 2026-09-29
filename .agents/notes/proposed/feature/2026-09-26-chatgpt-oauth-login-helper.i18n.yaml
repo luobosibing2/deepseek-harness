@@ -1,0 +1,22 @@
+# Bilingual-pair consistency record for 2026-09-26-chatgpt-oauth-login-helper.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/proposed/feature/2026-09-26-chatgpt-oauth-login-helper.md
+/agent-note-chatgpt-subscription-login-helper:
+  en: 4105aad9954f374b
+  zh: dc78803f655acc28
+/agent-note-chatgpt-subscription-login-helper/problem:
+  en: 0b504886a6a43ee9
+  zh: f4c096ab703cec68
+/agent-note-chatgpt-subscription-login-helper/proposal:
+  en: 4288ef22619c8ad2
+  zh: 8a50fa10d66ae312
+/agent-note-chatgpt-subscription-login-helper/alternatives-considered:
+  en: 5e62eab1274ed0ff
+  zh: 75c788651b603fba
+/agent-note-chatgpt-subscription-login-helper/acceptance-criteria:
+  en: 56db63ffb158a444
+  zh: df5bdb3b54282d9b
+/agent-note-chatgpt-subscription-login-helper/risks:
+  en: 30ceef4383e9835c
+  zh: 4f0b94f78e839fee
