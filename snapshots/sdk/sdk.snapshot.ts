@@ -213,6 +213,10 @@ const SDK_ASSERTIONS: Readonly<Record<string, SdkAssertions>> = {
   'ptc-cancel': {
     patches: [fileURLToPath(new URL('./ptc-cancel/runtime.cordis.yml', import.meta.url))],
   },
+  'response-interrupt': {
+    patches: [fileURLToPath(new URL('./response-interrupt/runtime.cordis.yml', import.meta.url))],
+    expectedFinalResponse: 'CORRECTED_RESPONSE',
+  },
   'ptc-turn': {
     patches: [fileURLToPath(new URL('./ptc-turn/runtime.cordis.yml', import.meta.url))],
     expectedFinalResponse: 'CODE_ONE+CODE_TWO',
@@ -1430,6 +1434,32 @@ describe('TypeScript SDK snapshots over the jsonrpc runtime', () => {
         expect(events.find(event => event.type === 'turn/end')).toMatchObject({
           data: { reason: { kind: 'aborted', reason: { kind: 'user' } } },
         })
+      }
+      if (scenario.name === 'response-interrupt') {
+        expect(results).toHaveLength(1)
+        const result = results[0]
+        if (result === undefined) throw new Error('response interruption has no owned run')
+        expect(result.finishReason).toBe('completed')
+        expect(result.events.filter(event => event.type === 'turn/start')).toMatchObject([{ data: { turn: 1 } }])
+        expect(result.events.filter(event => event.type === 'step/start')).toMatchObject([
+          { data: { turn: 1, step: 1 } }, { data: { turn: 1, step: 2 } },
+        ])
+        expect(result.events.filter(event => event.type === 'turn/end')).toMatchObject([
+          { data: { turn: 1, reason: { kind: 'completed' } } },
+        ])
+        const assistants = result.events.filter(event => event.type === 'assistant/message')
+        expect(assistants).toMatchObject([
+          { data: { turn: 1, step: 1, interrupted: true, message: { content: [{ type: 'text', text: 'partial' }] } } },
+          { data: { turn: 1, step: 2, message: { content: [{ type: 'text', text: 'CORRECTED_RESPONSE' }] } } },
+        ])
+        const users = result.events.filter(event => event.type === 'user/message')
+          .filter(event => event.data.source.kind === 'user')
+        expect(users.map(event => event.data.content)).toEqual([
+          [{ type: 'text', text: 'Review the current implementation.' }],
+          [{ type: 'text', text: 'Stop that approach and inspect the plugin instead.' }],
+        ])
+        const statuses = notifications.filter(notification => notification.method === 'session.status')
+        expect(statuses.map(notification => notification.params.status)).toEqual(['running', 'idle'])
       }
       if (scenario.name === 'minimal-image-compaction') {
         const events = results.flatMap(result => result.events)

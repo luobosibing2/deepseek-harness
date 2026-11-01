@@ -65,7 +65,7 @@ function stubAgentForSession(session: Session, suppliedCtx?: Context): StubAgent
     steer: () => {},
     inject(input) { this.inbox.append('next-step', input) },
     cancel() {},
-    runMaintenance: task => task(new AbortController().signal),
+    interruptResponse: () => false, runMaintenance: task => task(new AbortController().signal),
     whenIdle() { return Promise.resolve() },
   }
   const stub = {

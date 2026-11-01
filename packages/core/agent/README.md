@@ -53,9 +53,12 @@ Ordinary resume keeps the recorded choice. An entry point explicitly overriding 
 
 For scoped switch notices, call `installModelSelection(agentCtx)` from `dsh-agent` during Agent setup. The scope owns the listener and removes it on disposal.
 
+<a id="drive-an-agents-conversation"></a>
 ### Drive an agent's conversation
 
 The handle's methods route identified user-role messages into the agent's inbox. `followup()` queues an ordinary next-turn prompt and wakes the driver; `steer()` submits next-step input and wakes it; `inject()` adds model-facing context without waking the driver, so it lands in the next admitted step. `cancel(cause)` aborts the active activity and, unless `keepInbox` is set, clears pending work; `whenIdle()` resolves after the whole agent reaches quiescence.
+
+For an immediate correction, queue its message with `steer()` and call `interruptResponse()`. It requests cancellation of the current model response or recovery wait, records the response's text and reasoning without unexecuted tool calls, and proceeds through the next pre-step in the same turn. `true` acknowledges the request; the committed Assistant stream end and step end establish settlement. `false` means no eligible response remains or interruption was already requested. The method does not wake idle work or cancel tools, preparation, or maintenance. Whole-activity cancellation takes precedence.
 
 ```text
 handle.agent.followup({

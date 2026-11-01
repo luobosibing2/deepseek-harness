@@ -43,7 +43,7 @@ async function liveAgent(ctx: Context, session: Session, initial: AgentStatus): 
     steer: () => {},
     inject: () => {},
     cancel: (cause, options) => { cancels.push([cause, options]) },
-    runMaintenance: task => task(new AbortController().signal),
+    interruptResponse: () => false, runMaintenance: task => task(new AbortController().signal),
     whenIdle: () => Promise.resolve(),
     cancels,
     setStatus: (next) => { status = next },

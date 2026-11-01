@@ -1,0 +1,27 @@
+- banner:
+  - navigation "Session hierarchy": Review the current implementation.
+  - button "More actions"
+  - button "Open right sidebar"
+  - tablist:
+    - tab "Chat" [selected]
+    - tab "Trajectory"
+  - button "More conversation views"
+- text: Review the current implementation. 7/27 {{clock}}
+- button "Copy"
+- status: Completed
+- button "Completed in {{duration}}" [disabled]
+- paragraph: partial
+- text: Stopped Stop that approach and inspect the plugin instead. 7/27 {{clock}}
+- button "Copy"
+- paragraph: CORRECTED_RESPONSE
+- button "Copy"
+- button "Good response"
+- button "Bad response"
+- button "Branch into a new conversation"
+- text: 7/27 {{clock}}
+- textbox "Message or run a task, / commands, @ files or sessions"
+- button "Add files or run commands"
+- 'button "Access mode, current: Workspace Write"': Workspace Write
+- button "Select model, current DeepSeek-V4-Flash": DeepSeek-V4-Flash
+- button "Send message" [disabled]
+- button "1 turns 2 steps"

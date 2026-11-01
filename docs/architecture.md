@@ -113,6 +113,8 @@ Before assembly, the loop snapshots Session model selection in `AssembleContext.
 
 The loop sends immutable requests with live cancellation and reuses freeze evidence for frozen identities; [agent-loop](../packages/core/agent-loop/README.md) owns construction and cancellation causes.
 
+`Agent.interruptResponse()` uses its own cancellation signal. The loop settles the response before re-entering pre-step in the same turn; [Agent](../packages/core/agent/README.md#drive-an-agents-conversation) defines caller responsibilities.
+
 Failed steps [record missing tool results](../packages/core/agent-loop/README.md#understand-the-implementation).
 
 Details: the [sequence diagram](agent-lifecycle.md), the [tool pipeline](tool-execution-pipeline.md), and [cancellation and error recovery](subsystems/core.md#the-agent-handle).

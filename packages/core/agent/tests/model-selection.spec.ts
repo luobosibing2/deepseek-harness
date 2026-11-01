@@ -31,7 +31,7 @@ async function harness(options: AgentOptions = INITIAL) {
   const agent: Agent = {
     id: session.id, session, ctx, options, model, status: 'idle',
     get inbox() { return unused() },
-    cancel: unused, whenIdle: unused, runMaintenance: unused,
+    cancel: unused, whenIdle: unused, interruptResponse: () => false, runMaintenance: unused,
     send: unused, followup: unused, steer: unused, inject: unused,
   }
   const current = () => agent.model.current()

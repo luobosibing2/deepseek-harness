@@ -40,7 +40,7 @@ try {
     steer: () => {},
     inject: () => { throw new Error('dsh-badge snapshot must receive the catalog at the step boundary') },
     cancel: () => {},
-    runMaintenance: job => job(new AbortController().signal),
+    interruptResponse: () => false, runMaintenance: job => job(new AbortController().signal),
     whenIdle: () => Promise.resolve(),
   }
   const decision = await agentEvents(ctx, agent).waterfall(

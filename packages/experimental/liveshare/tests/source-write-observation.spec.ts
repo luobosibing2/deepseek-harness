@@ -85,7 +85,7 @@ function standInAgent(id: SessionId, cwd: string): Omit<Agent, 'ctx'> {
     inject: () => {},
     cancel: () => {},
     whenIdle: () => Promise.resolve(),
-    runMaintenance: task => task(new AbortController().signal),
+    interruptResponse: () => false, runMaintenance: task => task(new AbortController().signal),
   }
 }
 

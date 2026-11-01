@@ -465,7 +465,7 @@ describe('dsh-tool-workflow', () => {
         id: session.id, options: {}, session, model: unsupportedModel(),
         inbox: createInboxStub(), status: 'idle', ctx,
         send: () => {}, followup: () => {}, steer: () => {}, inject: () => {}, cancel: () => {},
-        runMaintenance: task => task(new AbortController().signal), whenIdle: () => Promise.resolve(),
+        interruptResponse: () => false, runMaintenance: task => task(new AbortController().signal), whenIdle: () => Promise.resolve(),
       }
       await ctx.agents.register(parent)
       return { ctx, engine, parent, session }
@@ -694,7 +694,7 @@ describe('dsh-tool-workflow', () => {
         id: session.id, options: {}, session, model: unsupportedModel(),
         inbox: createInboxStub(), status: 'idle', ctx,
         send: () => {}, followup: () => {}, steer: () => {}, inject: () => {}, cancel: () => {},
-        runMaintenance: task => task(new AbortController().signal), whenIdle: () => Promise.resolve(),
+        interruptResponse: () => false, runMaintenance: task => task(new AbortController().signal), whenIdle: () => Promise.resolve(),
       }
       await ctx.agents.register(parent)
 

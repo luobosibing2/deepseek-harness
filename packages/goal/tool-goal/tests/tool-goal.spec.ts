@@ -85,7 +85,7 @@ function stubAgent(rawId: string, supplied?: Session, suppliedCtx?: Context): St
       this.inbox.append('next-step', input)
     },
     cancel() {},
-    runMaintenance: task => task(new AbortController().signal),
+    interruptResponse: () => false, runMaintenance: task => task(new AbortController().signal),
     whenIdle() { return Promise.resolve() },
   }
   return { agent, session, inbox, setStatus(value) { status = value } }

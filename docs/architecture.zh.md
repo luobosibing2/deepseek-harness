@@ -117,6 +117,8 @@ turn/end
 
 循环发送不可变请求，同时保持取消有效，仅对完全冻结的对象复用冻结证据；[agent-loop](../packages/core/agent-loop/README.zh.md) 负责请求构建与取消原因。
 
+`Agent.interruptResponse()` 使用自己的取消信号。循环先完成响应结算，再重新进入同一回合的 pre-step；[Agent](../packages/core/agent/README.zh.md#drive-an-agents-conversation) 定义调用方责任。
+
 失败步骤会[记录缺失的工具结果](../packages/core/agent-loop/README.zh.md#understand-the-implementation)。
 
 详情见[时序图](agent-lifecycle.zh.md)、[工具流水线](tool-execution-pipeline.zh.md)和[取消与错误恢复](subsystems/core.zh.md#the-agent-handle)。

@@ -88,6 +88,18 @@ interface Agent {
   cancel(cause: AgentCancelCause, options?: CancelOptions): void
 
   /**
+   * Request cancellation of the active model response or its recovery wait,
+   * then continue through the next pre-step in the same turn. Queue steering
+   * separately before calling this method. Partial text and reasoning are
+   * recorded; unexecuted tool calls are discarded. Tools, preparation,
+   * maintenance and idle agents are unaffected, and no work is enqueued or
+   * awakened. Whole-activity cancellation still takes precedence.
+   * @returns true when this call requests an eligible response's interruption;
+   *   false when no eligible response remains or interruption was already requested.
+   */
+  interruptResponse(): boolean
+
+  /**
    * Resolve after the current whole-agent activity reaches quiescence. This
    * follows replacement work started before the observed driver retires,
    * but does not identify the settlement of any particular message.
@@ -1086,7 +1098,7 @@ Handle one failed model-request attempt before the loop retries or closes its st
  * @param payload.provider - the provider selected for the failed request.
  * @param payload.failure - serializable facts normalized at the final adapter boundary.
  * @param payload.retryPolicy - the policy of the adapter registration that served the failed request.
- * @param payload.signal - the turn abort signal.
+ * @param payload.signal - cancellation of the turn or the response being recovered.
  * Scope-filtered dispatch (`@deepseek-ai/dsh-scope`): agent-scoped listeners receive only that agent.
  * @mode waterfall
  */
