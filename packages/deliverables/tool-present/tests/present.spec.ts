@@ -44,7 +44,7 @@ async function agent(ctx: Context, cwd: string | undefined): Promise<Agent> {
     steer: () => ({ outcome: Promise.resolve({ status: 'rejected' as const }) }),
     inject: () => {},
     cancel() {},
-    runMaintenance: task => task(new AbortController().signal),
+    interruptResponse: () => false, runMaintenance: task => task(new AbortController().signal),
     whenIdle: () => Promise.resolve(),
   }
   await ctx.plugin(Object.assign((inner: Context) => { scope = createScope(inner, value) }, { inject: ['tools'] }))

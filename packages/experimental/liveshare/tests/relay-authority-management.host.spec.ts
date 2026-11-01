@@ -65,7 +65,8 @@ async function fixture(mode: 'view' | 'write') {
     inbox: { nextTurn: [], nextStep: [], clear: unsupported, append: unsupported, prepend: unsupported,
       replace: unsupported, remove: unsupported, splice: unsupported },
     send: unsupported, followup: unsupported, steer: unsupported, inject: unsupported,
-    cancel: vi.fn(), whenIdle: () => Promise.resolve(), runMaintenance: task => task(new AbortController().signal) }
+    cancel: vi.fn(), whenIdle: () => Promise.resolve(), interruptResponse: () => false,
+    runMaintenance: task => task(new AbortController().signal) }
   let scope: Scope | undefined
   await ctx.plugin(Object.assign((inner: Context) => { scope = createScope(inner, key) }, { inject: ['tools', 'systemPrompt'] }))
   if (scope === undefined) throw new Error('source scope missing')

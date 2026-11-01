@@ -1,0 +1,16 @@
+# Bilingual-pair consistency record for guide.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/upgrade-guide/v0.2.2-alpha.2/response-interruption/guide.md
+/:
+  en: b6efcc5c88280cdc
+  zh: 5a4ad1f1d1a80247
+/response-interruption-for-agent-implementations-and-recovery-listeners:
+  en: 3c7a75aa9e7dd314
+  zh: b56aa53057e89f89
+/response-interruption-for-agent-implementations-and-recovery-listeners/change:
+  en: f20c2d8024e8b3f4
+  zh: bc44ea75ab158667
+/response-interruption-for-agent-implementations-and-recovery-listeners/migration:
+  en: af86ebddbd173360
+  zh: 326ed51a37d16a99

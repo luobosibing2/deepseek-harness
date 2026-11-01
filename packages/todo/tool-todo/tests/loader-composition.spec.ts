@@ -40,7 +40,7 @@ async function agent(ctx: Context): Promise<Agent> {
     inbox: unsupportedInbox(),
     status: 'idle', ctx: scope.ctx,
     followup: () => {}, steer: () => {}, inject: () => {}, send: () => {}, cancel() {},
-    runMaintenance: task => task(new AbortController().signal),
+    interruptResponse: () => false, runMaintenance: task => task(new AbortController().signal),
     whenIdle: () => Promise.resolve(),
   }
   await ctx.agents.register(value)

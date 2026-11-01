@@ -1,0 +1,16 @@
+{
+  "finalResponse": "CORRECTED_RESPONSE",
+  "finishReason": "completed",
+  "turns": [1],
+  "steps": [[1, 1], [1, 2]],
+  "endings": [{ "kind": "completed" }],
+  "assistantMessages": [
+    { "turn": 1, "step": 1, "text": "partial", "interrupted": true },
+    { "turn": 1, "step": 2, "text": "CORRECTED_RESPONSE", "interrupted": false }
+  ],
+  "userMessages": [
+    "Review the current implementation.",
+    "Stop that approach and inspect the plugin instead."
+  ],
+  "statuses": ["running", "idle"]
+}

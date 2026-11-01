@@ -73,7 +73,7 @@ async function uploadHarness(origin?: 'subagent', imageLimits: ImageAttachmentLi
     id: session.id,
     options,
     whenIdle: vi.fn(() => Promise.resolve()),
-    runMaintenance: async () => { throw new Error('unexpected maintenance') },
+    interruptResponse: () => false, runMaintenance: async () => { throw new Error('unexpected maintenance') },
     send: vi.fn(),
     inject: vi.fn(),
     session,

@@ -1,0 +1,9 @@
+version: 1
+scenario: response-interrupt
+profile: web
+composition: web-default
+recording: authored
+header:
+  class: web-default
+session:
+  source: ../../sdk/response-interrupt/session.v4.jsonl

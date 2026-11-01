@@ -74,6 +74,8 @@ Every inbox mutation commits one normalized `agent/inbox/spliced` event. The pro
 
 Each step sends the session's derived history — with the latest non-empty `system/message` node as the effective prompt, or no system messages when the rendered prompt is empty — and its visible tool schemas; the model's tool calls run through the guarded tool pipeline and every accepted fact is appended to the session log before the next step derives from it. The loop passes the complete raw call batch to `ctx.tools.execute()`; built-in executors preserve model-order results and exclusive barriers. Cancellation is cooperative: `agent.cancel()` aborts the current activity and, unless `keepInbox` is set, clears pending work; a cancelled stream finalizes the text already delivered to the user.
 
+`agent.interruptResponse()` cancels only the active model response or recovery wait. It retains the turn signal, settles the interrupted response once, and returns control to the next pre-step in that turn. Callers queue the correction separately. The response signal also reaches `agent/request-error`, so recovery waits can stop without cancelling the turn. A committed response disables this control before tool dispatch; tools keep the turn signal. Transport cancellation does not guarantee that the provider immediately stops server-side computation.
+
 -----
 
 <a id="understand-the-implementation"></a>

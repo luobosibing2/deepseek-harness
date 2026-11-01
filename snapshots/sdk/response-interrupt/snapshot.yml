@@ -1,0 +1,9 @@
+version: 1
+scenario: response-interrupt
+profile: sdk
+composition: sdk-upload
+recording: authored
+header:
+  class: sdk-upload
+replay:
+  override: true

@@ -45,7 +45,7 @@ async function agent(ctx: Context): Promise<Agent> {
     steer: () => {},
     inject: () => {},
     cancel() { status = 'idle' },
-    runMaintenance: task => task(new AbortController().signal),
+    interruptResponse: () => false, runMaintenance: task => task(new AbortController().signal),
     whenIdle: () => Promise.resolve(),
   }
   await ctx.agents.register(value)

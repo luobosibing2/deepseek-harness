@@ -40,7 +40,7 @@ async function liveAgent(ctx: Context, session: Session): Promise<Agent> {
     steer: () => {},
     inject: () => {},
     cancel: () => {},
-    runMaintenance: task => task(new AbortController().signal),
+    interruptResponse: () => false, runMaintenance: task => task(new AbortController().signal),
     whenIdle: () => Promise.resolve(),
   }
   await ctx.agents.register(agent)

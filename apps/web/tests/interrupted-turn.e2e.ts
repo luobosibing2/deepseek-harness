@@ -75,3 +75,55 @@ describe.skipIf(MODE === 'record')('web e2e: turn interrupted by a DSH stop', ()
     await assertFixtureInventory(SNAPSHOT_DIR, ['ui.expected.md'])
   })
 })
+
+describe.skipIf(MODE === 'record')('web e2e: response interruption continues the same turn', () => {
+  const responseFixture = fileURLToPath(new URL('../../../snapshots/sdk/response-interrupt/session.v4.jsonl', import.meta.url))
+  const responseDir = fileURLToPath(new URL('../../../snapshots/web/response-interrupt', import.meta.url))
+  const seedId = 'response-interrupt-web-e2e'
+  let scaffold: WebScaffold
+  let browser: Browser
+  let page: Page
+  let tripwire: ReturnType<typeof watchConsole>
+
+  beforeAll(async () => {
+    scaffold = await launchWebScaffold({})
+    await seedSession(scaffold, await readFile(responseFixture, 'utf8'), seedId, undefined, { createdAt: WEB_FIXTURE_TIME })
+    browser = await chromium.launch()
+    page = await newEnglishPage(browser)
+    await page.clock.setFixedTime(WEB_FIXTURE_TIME)
+    tripwire = watchConsole(page)
+    await page.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
+    await page.waitForSelector('[class*="frame"]', { timeout: 30_000 })
+    const groupRow = page.locator('[role="treeitem"]').first()
+    await groupRow.waitFor({ timeout: 15_000 })
+    await groupRow.click()
+    const sessionRow = page.locator('[role="treeitem"]').nth(1)
+    await sessionRow.waitFor({ timeout: 10_000 })
+    await sessionRow.click()
+  }, 120_000)
+
+  afterAll(async () => {
+    await browser?.close()
+    await scaffold?.close()
+  })
+
+  it('shows both responses and the correction without a stopped-task notice', async () => {
+    onTestFailed(() => saveFailureShot(page, 'web-e2e-response-interrupt'))
+    await page.getByText('CORRECTED_RESPONSE', { exact: true }).waitFor({ timeout: 15_000 })
+    const processControl = page.locator('[data-turn-process="1"]')
+    expect(await processControl.textContent()).toMatch(/^Completed in /u)
+    if (await processControl.getAttribute('aria-expanded') === 'false') await processControl.click()
+    expect(await page.getByRole('status').filter({ hasText: 'Task stopped' }).count()).toBe(0)
+    expect(await page.getByText('Stop that approach and inspect the plugin instead.', { exact: true }).count()).toBe(1)
+    expect(await page.getByText('partial', { exact: true }).count()).toBe(1)
+    const snapshot = (await captureStableAria(page, '[class*="centerCol"]', scaffold.workspaceCwd))
+      .split(seedId).join('{{seededId}}')
+    await compareOrRefreshGolden(join(responseDir, 'ui.expected.md'), snapshot, MODE)
+    expect(tripwire.pageErrors).toEqual([])
+    expect(tripwire.warnings).toEqual([])
+  }, 60_000)
+
+  it('keeps its snapshot inventory closed', async () => {
+    await assertFixtureInventory(responseDir, ['ui.expected.md'])
+  })
+})

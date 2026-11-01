@@ -114,6 +114,8 @@ export class ReactLoopAgent implements Agent {
   readonly inbox: ReactLoopInbox
   private phase: Phase
   private activityDone: Promise<void> = Promise.resolve()
+  /** Active model response and recovery wait; tool execution keeps the turn signal. */
+  private responseAbort: AbortController | undefined
 
   /** The agent-scoped registration boundary; the lifecycle owner unwinds it after the driver exits. */
   readonly scope: Scope
@@ -194,6 +196,13 @@ export class ReactLoopAgent implements Agent {
       if (this.phase.kind !== 'idle') this.phase.wakeRequested = false
     }
     if (this.phase.kind !== 'idle') this.phase.abort.abort(cause)
+  }
+
+  interruptResponse(): boolean {
+    if (this.phase.kind !== 'running' || this.phase.abort.signal.aborted
+      || this.responseAbort === undefined || this.responseAbort.signal.aborted) return false
+    this.responseAbort.abort()
+    return true
   }
 
   runMaintenance<T>(job: (signal: AbortSignal) => Promise<T>): Promise<T> {
@@ -476,7 +485,9 @@ export class ReactLoopAgent implements Agent {
         this.session.append('user/message', context, { surfaceOp: 'append' })
       }
       firstAttempt = false
-      const request = this.buildRequest(config, preparedCall, assembly.tools, { turn, step }, startsRequestSeries, signal)
+      const responseAbort = new AbortController()
+      const responseSignal = AbortSignal.any([signal, responseAbort.signal])
+      const request = this.buildRequest(config, preparedCall, assembly.tools, { turn, step }, startsRequestSeries, responseSignal)
       const live = new AssistantStreamAttempt(
         this.session.id,
         ++this.assistantAttemptCounter,
@@ -485,126 +496,142 @@ export class ReactLoopAgent implements Agent {
         step,
         (frame) => { this.dispatch.emit('agent/assistant-stream', { frame }) },
       )
-      let started = false
       try {
-        const stream = preparedCall?.stream(request) ?? this.loopCtx.llm.stream(request)
-        signal.throwIfAborted()
-        live.start()
-        started = true
-        for await (const chunk of stream) {
-          signal.throwIfAborted()
-          live.push(chunk)
-        }
-        signal.throwIfAborted()
-      } catch (error: unknown) {
-        if (!started) throw error
+        let started = false
         try {
-          if (signal.aborted) {
-            const content = live.interruptedBlocks()
-            if (content.length > 0) {
-              live.settle('assistant/message', () => this.session.append('assistant/message', {
-                turn,
-                step,
-                message: createAssistantMessage({
-                  content,
-                  source: {
-                    provider: request.provider,
-                    model: request.model,
-                    ...live.replayState === undefined ? {} : { replayState: live.replayState },
-                  },
-                }),
-                interrupted: true,
-                ...live.usage === undefined ? {} : { usage: live.usage },
-                stream: live.stream,
-              }, { surfaceOp: 'append' }).seq)
+          const stream = preparedCall?.stream(request) ?? this.loopCtx.llm.stream(request)
+          responseSignal.throwIfAborted()
+          this.responseAbort = responseAbort
+          live.start()
+          started = true
+          for await (const chunk of stream) {
+            responseSignal.throwIfAborted()
+            live.push(chunk)
+          }
+          responseSignal.throwIfAborted()
+        } catch (error: unknown) {
+          if (!started) throw error
+          try {
+            if (responseSignal.aborted) {
+              const content = live.interruptedBlocks()
+              if (content.length > 0) {
+                live.settle('assistant/message', () => this.session.append('assistant/message', {
+                  turn,
+                  step,
+                  message: createAssistantMessage({
+                    content,
+                    source: {
+                      provider: request.provider,
+                      model: request.model,
+                      ...live.replayState === undefined ? {} : { replayState: live.replayState },
+                    },
+                  }),
+                  interrupted: true,
+                  ...live.usage === undefined ? {} : { usage: live.usage },
+                  stream: live.stream,
+                }, { surfaceOp: 'append' }).seq)
+              } else {
+                live.settle(
+                  'assistant/attempt',
+                  () => this.session.append('assistant/attempt', { turn, step, stream: live.stream }).seq,
+                )
+              }
             } else {
               live.settle(
                 'assistant/attempt',
                 () => this.session.append('assistant/attempt', { turn, step, stream: live.stream }).seq,
               )
             }
-          } else {
+          } catch (settlementError: unknown) {
+            throw new AggregateError(
+              [error, settlementError],
+              'Assistant stream failed and its durable settlement was rejected',
+              { cause: error },
+            )
+          }
+          signal.throwIfAborted()
+          if (responseAbort.signal.aborted && error === responseSignal.reason) return null
+          throw error
+        }
+        try {
+          const finish = live.finish
+          if (finish.kind === 'error' || finish.kind === 'aborted') {
             live.settle(
               'assistant/attempt',
               () => this.session.append('assistant/attempt', { turn, step, stream: live.stream }).seq,
             )
+            let action: RequestErrorAction
+            try {
+              action = await this.dispatch.waterfall(
+                'agent/request-error', {
+                  turn,
+                  step,
+                  provider: request.provider,
+                  failure: finish.failure,
+                  retryPolicy: preparedCall?.retryPolicy,
+                  signal: responseSignal,
+                },
+                () => Promise.resolve<RequestErrorAction>(undefined),
+              )
+            } catch (error: unknown) {
+              signal.throwIfAborted()
+              if (responseAbort.signal.aborted && error === responseSignal.reason) return null
+              throw error
+            }
+            signal.throwIfAborted()
+            if (responseAbort.signal.aborted) return null
+            if (action?.kind !== 'retry') {
+              throw new LlmError(finish.failure.message, finish.failure.code, finish.failure)
+            }
+            continue
           }
-        } catch (settlementError: unknown) {
-          throw new AggregateError(
-            [error, settlementError],
-            'Assistant stream failed and its durable settlement was rejected',
-            { cause: error },
-          )
-        }
-        throw error
-      }
-      try {
-        const finish = live.finish
-        if (finish.kind === 'error' || finish.kind === 'aborted') {
+
+          this.responseAbort = undefined
+          const message = createAssistantMessage({
+            content: live.blocks(),
+            source: {
+              provider: request.provider,
+              model: request.model,
+              ...live.replayState !== undefined ? { replayState: live.replayState } : {},
+            },
+          })
           live.settle(
-            'assistant/attempt',
-            () => this.session.append('assistant/attempt', { turn, step, stream: live.stream }).seq,
-          )
-          const action = await this.dispatch.waterfall(
-            'agent/request-error', {
+            'assistant/message',
+            () => this.session.append('assistant/message', {
               turn,
               step,
-              provider: request.provider,
-              failure: finish.failure,
-              retryPolicy: preparedCall?.retryPolicy,
-              signal,
-            },
-            () => Promise.resolve<RequestErrorAction>(undefined),
+              message,
+              ...live.usage === undefined ? {} : { usage: live.usage },
+              stream: live.stream,
+            }, { surfaceOp: 'append' }).seq,
           )
-          signal.throwIfAborted()
-          if (action?.kind !== 'retry') {
-            throw new LlmError(finish.failure.message, finish.failure.code, finish.failure)
-          }
-          continue
-        }
+          if (finish.kind === 'max-tokens') return { kind: 'max-tokens' }
 
-        const message = createAssistantMessage({
-          content: live.blocks(),
-          source: {
-            provider: request.provider,
-            model: request.model,
-            ...live.replayState !== undefined ? { replayState: live.replayState } : {},
-          },
-        })
-        live.settle(
-          'assistant/message',
-          () => this.session.append('assistant/message', {
-            turn,
-            step,
-            message,
-            ...live.usage === undefined ? {} : { usage: live.usage },
-            stream: live.stream,
-          }, { surfaceOp: 'append' }).seq,
-        )
-        if (finish.kind === 'max-tokens') return { kind: 'max-tokens' }
-
-        const toolCalls = message.content.filter(block => block.type === 'tool-call')
-        if (toolCalls.length === 0) return { kind: 'completed' }
-        const maxParallelToolCalls = this.loopCtx.agentLoop.config.maxParallelToolCalls.get()
-        try {
-          const result = await this.loopCtx.tools.execute({
-            calls: toolCalls, signal, agent: this, log: { turn, step },
-            maxParallelToolCalls, toolSet: decision.toolSet,
-          })
-          for (const context of result.additionalContexts) {
-            this.inbox.splice('next-step', this.inbox.nextStep.length, 0, [context])
+          const toolCalls = message.content.filter(block => block.type === 'tool-call')
+          if (toolCalls.length === 0) return { kind: 'completed' }
+          const maxParallelToolCalls = this.loopCtx.agentLoop.config.maxParallelToolCalls.get()
+          try {
+            const result = await this.loopCtx.tools.execute({
+              calls: toolCalls, signal, agent: this, log: { turn, step },
+              maxParallelToolCalls, toolSet: decision.toolSet,
+            })
+            for (const context of result.additionalContexts) {
+              this.inbox.splice('next-step', this.inbox.nextStep.length, 0, [context])
+            }
+            return result.concluded ? { kind: 'completed' } : null
+          } catch (error: unknown) {
+            if (!(error instanceof ToolBatchExecutionError)) throw error
+            for (const context of error.partial.additionalContexts) {
+              this.inbox.splice('next-step', this.inbox.nextStep.length, 0, [context])
+            }
+            throw error.cause
           }
-          return result.concluded ? { kind: 'completed' } : null
         } catch (error: unknown) {
-          if (!(error instanceof ToolBatchExecutionError)) throw error
-          for (const context of error.partial.additionalContexts) {
-            this.inbox.splice('next-step', this.inbox.nextStep.length, 0, [context])
-          }
-          throw error.cause
+          if (!live.ended) live.abandon()
+          throw error
         }
-      } catch (error: unknown) {
-        if (!live.ended) live.abandon()
-        throw error
+      } finally {
+        this.responseAbort = undefined
       }
     }
   }
