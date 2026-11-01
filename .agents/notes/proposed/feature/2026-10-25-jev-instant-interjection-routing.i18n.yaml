@@ -1,0 +1,58 @@
+# Bilingual-pair consistency record for 2026-10-25-jev-instant-interjection-routing.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/proposed/feature/2026-10-25-jev-instant-interjection-routing.md
+/agent-note-jev-interjection-routing-and-dsh-response-interruption:
+  en: 1ba851dbe872d564
+  zh: 63dc990d6b37cbf2
+/agent-note-jev-interjection-routing-and-dsh-response-interruption/problem:
+  en: f83031f1c7b31921
+  zh: eec9e296727c6824
+/agent-note-jev-interjection-routing-and-dsh-response-interruption/proposal:
+  en: 366b6133a641f9e3
+  zh: 45942160dc8d9d56
+/agent-note-jev-interjection-routing-and-dsh-response-interruption/proposal/scope-and-ownership:
+  en: 56b13dd452ac739d
+  zh: fd289cba8e54f9b7
+/agent-note-jev-interjection-routing-and-dsh-response-interruption/added-requirements:
+  en: b2b5773f6ec04872
+  zh: b4a8746c6c2014ca
+/agent-note-jev-interjection-routing-and-dsh-response-interruption/modified-requirements:
+  en: ca8d99b835f136cc
+  zh: 6a2d701e61445efe
+/agent-note-jev-interjection-routing-and-dsh-response-interruption/removed-requirements:
+  en: 2aed290228de82cc
+  zh: 88e4724f9bc16bdb
+/agent-note-jev-interjection-routing-and-dsh-response-interruption/preserved-behavior:
+  en: 40d3fddb043f04dd
+  zh: abe1d387c1d54a1d
+/agent-note-jev-interjection-routing-and-dsh-response-interruption/inputs-defaults-ordering-and-priority:
+  en: 60671d86edea4d75
+  zh: 45c06558b8d8b7da
+/agent-note-jev-interjection-routing-and-dsh-response-interruption/failures-and-fallback:
+  en: d62666711bd05da6
+  zh: 15b4f5485cdfbefa
+/agent-note-jev-interjection-routing-and-dsh-response-interruption/end-to-end-delivery:
+  en: b9ff02110c1600f3
+  zh: af6ff11d9aa52c37
+/agent-note-jev-interjection-routing-and-dsh-response-interruption/public-api-and-consumers:
+  en: aa398fc56502d086
+  zh: c2377f2c03488724
+/agent-note-jev-interjection-routing-and-dsh-response-interruption/related-decisions:
+  en: bf0e7c8f882cc0b2
+  zh: e6da060c5962e0f2
+/agent-note-jev-interjection-routing-and-dsh-response-interruption/alternatives-considered:
+  en: 446c93eeafca8fad
+  zh: e20053fd80cccf5d
+/agent-note-jev-interjection-routing-and-dsh-response-interruption/acceptance-criteria:
+  en: a416cb82803f0686
+  zh: af8e504f4215e2f0
+/agent-note-jev-interjection-routing-and-dsh-response-interruption/verification:
+  en: e2a23b1ee54cab70
+  zh: 4e631491008905a4
+/agent-note-jev-interjection-routing-and-dsh-response-interruption/non-goals:
+  en: 87b88a654db8d1c3
+  zh: afb2dd145c8bd068
+/agent-note-jev-interjection-routing-and-dsh-response-interruption/risks:
+  en: d18741a6679d0ed0
+  zh: f25dba4d090f489d
